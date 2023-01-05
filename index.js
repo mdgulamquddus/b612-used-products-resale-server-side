@@ -42,9 +42,36 @@ async function run() {
         expiresIn: "1d",
       });
 
+      // Get A Single User
+      app.get("/user/:email", async (req, res) => {
+        const email = req.params.email;
+        // const decodedEmail = req.decoded.email;
+
+        // if (email !== decodedEmail) {
+        //   return res.status(403).send({ message: "forbidden access" });
+        // }
+        const query = { email: email };
+        const user = await usersCollection.findOne(query);
+        console.log(user);
+        res.send(user);
+      });
       res.send({ result, token });
     });
 
+    // Get All User
+    app.get("/users", async (req, res) => {
+      const query = {};
+      const cursor = usersCollection.find(query);
+      const users = await cursor.toArray();
+      res.send(users);
+    });
+    //Get All Products
+    app.get("/products", async (req, res) => {
+      const query = {};
+      const cursor = productsCollection.find(query);
+      const products = await cursor.toArray();
+      res.send(products);
+    });
     console.log("Database Connected...");
   } finally {
   }
