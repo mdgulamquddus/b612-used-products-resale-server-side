@@ -45,6 +45,7 @@ async function run() {
       // Get A Single User
       app.get("/user/:email", async (req, res) => {
         const email = req.params.email;
+        console.log(email);
         // const decodedEmail = req.decoded.email;
 
         // if (email !== decodedEmail) {
@@ -65,9 +66,32 @@ async function run() {
       const users = await cursor.toArray();
       res.send(users);
     });
+    // Delete A user
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id: ObjectId(id),
+      };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
     //Get All Products
     app.get("/products", async (req, res) => {
       const query = {};
+      const cursor = productsCollection.find(query);
+      const products = await cursor.toArray();
+      res.send(products);
+    });
+
+    //Get Single Product
+    app.get("/products/:category", async (req, res) => {
+      const category = req.params.category.toUpperCase();
+      console.log(category);
+      const query = {
+        category: category,
+      };
       const cursor = productsCollection.find(query);
       const products = await cursor.toArray();
       res.send(products);
