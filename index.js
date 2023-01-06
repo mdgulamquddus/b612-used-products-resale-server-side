@@ -110,6 +110,18 @@ async function run() {
       const products = await cursor.toArray();
       res.send(products);
     });
+    app.get("/products/advertise", async (req, res) => {
+      const query = {};
+      const cursor = productsCollection.find(query);
+      const products = await cursor.toArray();
+      let advertise = [];
+      const advertiseProduct = products.filter(
+        (product) =>
+          product.advertise === "yes" && product.status === "available"
+      );
+      console.log(advertiseProduct);
+      res.send(advertiseProduct);
+    });
 
     //Get Single Product with category
     app.get("/products/:category", async (req, res) => {
@@ -151,6 +163,38 @@ async function run() {
       const result = await productsCollection.deleteOne(query);
       res.send(result);
     });
+
+    // request for advertise product
+    app.put("/products/advertise/:id", async (req, res) => {
+      // const decodedEmail = req.decoded.email;
+      // console.log(decodedEmail);
+      // const query = {
+      //   email: decodedEmail,
+      // };
+      // const query = {};
+      // const user = await usersCollection.findOne(query);
+      // if (user?.role !== "admin") {
+      //   return res.status(403).json({ message: "Forbiden Access" });
+      // }
+      const id = req.params.id;
+
+      const filter = {
+        _id: ObjectId(id),
+      };
+      const option = { upsert: true };
+      const updateDoc = {
+        $set: { advertise: "yes" },
+      };
+
+      const result = await productsCollection.updateOne(
+        filter,
+        updateDoc,
+        option
+      );
+      res.send(result);
+      console.log(result);
+    });
+
     console.log("Database Connected...");
   } finally {
   }
