@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 
@@ -71,6 +71,25 @@ async function run() {
       const cursor = productsCollection.find(query);
       const products = await cursor.toArray();
       res.send(products);
+    });
+
+    // Post A Product
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // Delete A Product
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id: ObjectId(id),
+      };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
     });
     console.log("Database Connected...");
   } finally {
