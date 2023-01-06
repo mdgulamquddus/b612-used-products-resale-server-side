@@ -59,6 +59,32 @@ async function run() {
       res.send({ result, token });
     });
 
+    // make verified user
+    app.put("/users/verify/:id", async (req, res) => {
+      // const decodedEmail = req.decoded.email;
+      // console.log(decodedEmail);
+      // const query = {
+      //   email: decodedEmail,
+      // };
+      // const query = {};
+      // const user = await usersCollection.findOne(query);
+      // if (user?.role !== "admin") {
+      //   return res.status(403).json({ message: "Forbiden Access" });
+      // }
+      const id = req.params.id;
+
+      const filter = {
+        _id: ObjectId(id),
+      };
+      const option = { upsert: true };
+      const updateDoc = {
+        $set: { status: "verified" },
+      };
+
+      const resutl = await usersCollection.updateOne(filter, updateDoc, option);
+      res.send(resutl);
+    });
+
     // Get All User
     app.get("/users", async (req, res) => {
       const query = {};
@@ -85,7 +111,7 @@ async function run() {
       res.send(products);
     });
 
-    //Get Single Product
+    //Get Single Product with category
     app.get("/products/:category", async (req, res) => {
       const category = req.params.category.toUpperCase();
       console.log(category);
@@ -96,7 +122,17 @@ async function run() {
       const products = await cursor.toArray();
       res.send(products);
     });
-
+    //Get Single Product with email
+    app.get("/products/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = {
+        email,
+      };
+      const cursor = productsCollection.find(query);
+      const products = await cursor.toArray();
+      res.send(products);
+    });
     // Post A Product
     app.post("/products", async (req, res) => {
       const product = req.body;
