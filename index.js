@@ -22,6 +22,7 @@ async function run() {
   try {
     const productsCollection = client.db("Ubuy").collection("products");
     const usersCollection = client.db("Ubuy").collection("users");
+    const wishListsCollection = client.db("Ubuy").collection("wishLists");
 
     //Save user and genarate jwt token
     app.put("/user/:email", async (req, res) => {
@@ -193,6 +194,14 @@ async function run() {
       );
       res.send(result);
       console.log(result);
+    });
+
+    //Save Product in Wish List
+    app.post("/products/wishlist", async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await wishListsCollection.insertOne(product);
+      res.send(result);
     });
 
     console.log("Database Connected...");
