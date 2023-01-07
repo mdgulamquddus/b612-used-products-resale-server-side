@@ -23,6 +23,7 @@ async function run() {
     const productsCollection = client.db("Ubuy").collection("products");
     const usersCollection = client.db("Ubuy").collection("users");
     const wishListsCollection = client.db("Ubuy").collection("wishLists");
+    const bookingsCollection = client.db("Ubuy").collection("bookings");
 
     //Save user and genarate jwt token
     app.put("/user/:email", async (req, res) => {
@@ -43,21 +44,22 @@ async function run() {
         expiresIn: "1d",
       });
 
-      // Get A Single User
-      app.get("/user/:email", async (req, res) => {
-        const email = req.params.email;
-        console.log(email);
-        // const decodedEmail = req.decoded.email;
-
-        // if (email !== decodedEmail) {
-        //   return res.status(403).send({ message: "forbidden access" });
-        // }
-        const query = { email: email };
-        const user = await usersCollection.findOne(query);
-        console.log(user);
-        res.send(user);
-      });
       res.send({ result, token });
+    });
+
+    // Get A Single User
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      // const decodedEmail = req.decoded.email;
+
+      // if (email !== decodedEmail) {
+      //   return res.status(403).send({ message: "forbidden access" });
+      // }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      console.log(user);
+      res.send(user);
     });
 
     // make verified user
@@ -146,6 +148,21 @@ async function run() {
       const products = await cursor.toArray();
       res.send(products);
     });
+
+    //Get Single Product with id
+    app.get("/productsDetails/:id", async (req, res) => {
+      const id = req.params.id;
+
+      // console.log(parseInt(id));
+      const query = {
+        _id: ObjectId(id),
+      };
+      console.log(query);
+      const cursor = await productsCollection.findOne(query);
+      // // const products = await cursor.toArray();
+      // console.log(cursor);
+      res.send(cursor);
+    });
     // Post A Product
     app.post("/products", async (req, res) => {
       const product = req.body;
@@ -202,6 +219,56 @@ async function run() {
       console.log(product);
       const result = await wishListsCollection.insertOne(product);
       res.send(result);
+    });
+
+    // Delete A Product in WishList
+    app.delete("/products/wishlist/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id: ObjectId(id),
+      };
+      const result = await wishListsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //Save Product booking
+    app.post("/products/booking", async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await bookingsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    //Get All Products with eamil address Wish List
+    app.get("/products/wishlist/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        userEmail: email,
+      };
+      console.log(email);
+
+      const result = await wishListsCollection.find(query).toArray();
+      res.send(result);
+
+      // result.map(async (pid) => {
+      //   // console.log(pid.productId);
+      //   const query = {
+      //     _id: ObjectId(pid.productId),
+      //   };
+      //   // console.log(query);
+      //   // const id = pid.productId.filter((p) => p);
+      //   // console.log(id);
+      //   // const query = {};
+      //   // // const productQuery = { _id: ObjectId(query) };
+      //   const products = await productsCollection.find(query).toArray();
+      //   // console.log(products);
+      //   const filterProduct = products.filter((pd) => console.log(pd._id));
+      //   // console.log(filterProduct);
+      //   // // const cursor = await products.toArray();
+      //   // // res.send(products);
+      //   // console.log([...filterProduct]);
+      // });
     });
 
     console.log("Database Connected...");
