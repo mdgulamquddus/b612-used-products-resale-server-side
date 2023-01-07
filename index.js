@@ -233,10 +233,33 @@ async function run() {
     });
 
     //Save Product booking
-    app.post("/products/booking", async (req, res) => {
+    app.post("/product/booking", async (req, res) => {
       const product = req.body;
       console.log(product);
       const result = await bookingsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    //Get all booking product by email
+    app.get("/product/booking/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = {
+        userEmail: email,
+      };
+      const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
+      // console.log(result);
+    });
+
+    // Delete A Product in Booking
+    app.delete("/product/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id: ObjectId(id),
+      };
+      const result = await bookingsCollection.deleteOne(query);
       res.send(result);
     });
 
