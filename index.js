@@ -6,7 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 
@@ -24,6 +24,24 @@ async function run() {
     const usersCollection = client.db("Ubuy").collection("users");
     const wishListsCollection = client.db("Ubuy").collection("wishLists");
     const bookingsCollection = client.db("Ubuy").collection("bookings");
+
+    const verifyToken = (req, res, next) => {
+      const authHeader = req.headers.authorization;
+      console.log(req.headers.authorization);
+      if (!authHeader) {
+        return res.status(401).json({ message: "Untuthorized Access" });
+      }
+      const token = authHeader.split(" ")[1];
+
+      jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+          return res.status(403).json({ message: "Forbiden Access" });
+        }
+        req.decoded = decoded;
+
+        next();
+      });
+    };
 
     //Save user and genarate jwt token
     app.put("/user/:email", async (req, res) => {
@@ -50,12 +68,7 @@ async function run() {
     // Get A Single User
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
-      // const decodedEmail = req.decoded.email;
 
-      // if (email !== decodedEmail) {
-      //   return res.status(403).send({ message: "forbidden access" });
-      // }
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       console.log(user);
@@ -64,16 +77,6 @@ async function run() {
 
     // make verified user
     app.put("/users/verify/:id", async (req, res) => {
-      // const decodedEmail = req.decoded.email;
-      // console.log(decodedEmail);
-      // const query = {
-      //   email: decodedEmail,
-      // };
-      // const query = {};
-      // const user = await usersCollection.findOne(query);
-      // if (user?.role !== "admin") {
-      //   return res.status(403).json({ message: "Forbiden Access" });
-      // }
       const id = req.params.id;
 
       const filter = {
@@ -247,6 +250,14 @@ async function run() {
       const query = {
         userEmail: email,
       };
+      const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
+      // console.log(result);
+    });
+
+    //Get all bookings
+    app.get("/product/booking", async (req, res) => {
+      const query = {};
       const result = await bookingsCollection.find(query).toArray();
       res.send(result);
       // console.log(result);
